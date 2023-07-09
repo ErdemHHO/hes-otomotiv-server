@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 
 // import sellingRoutes from './routes/selling.js';
 // import paymentRoutes from './routes/payment.js';
+import userRoutes from './routes/user.js';
 import brandRoutes from './routes/brand.js';
 import categoryRoutes from './routes/category.js';
 import carRoutes from './routes/car.js';
@@ -25,6 +26,7 @@ app.use(express.static("public"));
 
 // app.use('/api/selling', sellingRoutes);
 // app.use('/api/payment', paymentRoutes);
+app.use("/api/user", userRoutes);
 app.use('/api/brand', brandRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/car', carRoutes);
