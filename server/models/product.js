@@ -95,7 +95,7 @@ const ProductSchema = new mongoose.Schema({
 
 // Pre-save hook to generate slug
 ProductSchema.pre('save', async function (next) {
-  const nameSlug = slugify(this.title, { lower: true, remove: /[*+~.()'"!:@]/g });
+  const nameSlug = slugify(this.title, { lower: true, remove: /[*/+~.()'"!:@]/g });
   const slug = nameSlug.replace(/\s+/g, '-');
   this.slug = `${slug}-${this.stockCode}`;
 
