@@ -3,6 +3,8 @@ import ProductModel from '../models/product.js';
 import SeriModel from '../models/seri.js';
 import CarModel from '../models/car.js';
 import CategoryModel from '../models/category.js';
+import BrandModel from '../models/brand.js';
+
 
 import fs from'fs';
 import s3 from '../s3.js';
@@ -14,7 +16,8 @@ const bucketName = "hes-otomotiv";
 
 const getAllProducts = async (req, res) => {
     try {
-      const products = await ProductModel.find({ isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image slug image_urls');
+      const products = await ProductModel.find({ isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image slug image_urls')
+      .populate('brand_id', 'name');
       if (!products || products.length === 0) {
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
       }
@@ -49,7 +52,7 @@ const getProduct = async (req, res) => {
     try {
         const { productSlug } = req.params;
   
-        const product = await ProductModel.findOne({ slug: productSlug }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug');
+        const product = await ProductModel.findOne({ slug: productSlug }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
       if (!product) {
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
       }
@@ -91,7 +94,7 @@ const getProductsByCarSlug = async (req, res) => {
       const carId = car._id;
   
       // ProductModel'de ilgili car_id'ye ve isActive=true'ye göre ürünleri arama yapılıyor
-      const products = await ProductModel.find({ car_id: carId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug');
+      const products = await ProductModel.find({ car_id: carId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
   
       if (!products || products.length === 0) {
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
@@ -146,7 +149,7 @@ const getProductsByCarAndCategory = async (req, res) => {
       const categoryId = category._id;
   
       // ProductModel'de ilgili car_id, category_id ve isActive=true'ye göre ürünleri arama yapılıyor
-      const products = await ProductModel.find({ car_id: carId, category_id: categoryId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug');
+      const products = await ProductModel.find({ car_id: carId, category_id: categoryId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
   
       if (!products || products.length === 0) {
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
@@ -201,7 +204,7 @@ const getProductsBySeriesSlug = async (req, res) => {
       const carId = car._id;
   
       // ProductModel'de ilgili car_id'ye ve isActive=true'ye göre ürünleri arama yap
-      const products = await ProductModel.find({ car_id: carId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug');
+      const products = await ProductModel.find({ car_id: carId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
   
       if (!products || products.length === 0) {
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
@@ -261,7 +264,6 @@ const getCarsBySeriesSlug = async (req, res) => {
       return res.status(400).json({ success: false, message: error.message });
     }
 };
-
   
 const getAllCars = async (req, res) => {
     try {
@@ -343,7 +345,122 @@ const getAllCategories = async (req, res) => {
       return res.status(400).json({ success: false, message: error.message });
     }
 };
-  
+
+const getSeriBySlug = async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const seri = await SeriModel.findOne({ slug });
+      if (!seri) {
+        return res.status(400).json({ success: false, message: "Seri bulunamadı" });
+      }
+      return res.status(200).json({ success: true, seri });
+    } catch (error) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const getCarBySlug = async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const car = await CarModel.findOne({ slug });
+      if (!car) {
+        return res.status(400).json({ success: false, message: "Araba bulunamadı" });
+      }
+      return res.status(200).json({ success: true, car });
+    } catch (error) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const getCategoryBySlug = async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const category = await CategoryModel.findOne({ slug });
+      if (!category) {
+        return res.status(400).json({ success: false, message: "Kategori bulunamadı" });
+      }
+      return res.status(200).json({ success: true, category });
+    } catch (error) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const searchProduct = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    const products = await ProductModel.find(
+      {
+        isActive: true,
+        $or: [
+          { name: { $regex: q, $options: "i" } },
+          { title: { $regex: q, $options: "i" } },
+          { stockCode: { $regex: q, $options: "i" } }
+        ]
+      },
+      {
+        name: 1,
+        title: 1,
+        oemNumber: 1,
+        stockCode: 1,
+        car_id: 1,
+        category_id: 1,
+        status: 1,
+        brand_id: 1,
+        stock: 1,
+        oldPrice: 1,
+        sellingPrice: 1,
+        salesFormat: 1,
+        image: 1,
+        slug: 1,
+        image_urls: 1
+      }
+    );
+
+    if (!products || products.length === 0) {
+      return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
+    }
+
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        if (product.image_urls && product.image_urls.length > 0) {
+          const imageUrls = await Promise.all(
+            product.image_urls.map(async (imageUrl) => {
+              const filename = imageUrl.split('/').pop();
+              const params = {
+                Bucket: bucketName,
+                Key: filename,
+              };
+              const signedUrl = await s3.getSignedUrlPromise('getObject', params);
+              return signedUrl;
+            })
+          );
+          return { ...product._doc, image_urls: imageUrls };
+        }
+        return product;
+      })
+    );
+
+    return res.status(200).json({ success: true, products: productsWithImages });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const getBrandById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const brand = await BrandModel.findById(id);
+    if (!brand) {
+      return res.status(400).json({ success: false, message: "Marka bulunamadı" });
+    }
+    return res.status(200).json({ success: true, brand });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+
   export {
   getAllProducts,
   getProduct,
@@ -353,6 +470,11 @@ const getAllCategories = async (req, res) => {
   getAllCars,
   getAllSeries,
   getAllCategories,
-  getCarsBySeriesSlug
+  getCarsBySeriesSlug,
+  getSeriBySlug,
+  getCarBySlug,
+  getCategoryBySlug,
+  searchProduct,
+  getBrandById
 };
   

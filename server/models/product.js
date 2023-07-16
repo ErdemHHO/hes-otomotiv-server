@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
+import BrandModel from './brand.js';
+import CategoryModel from './category.js';
+import CarModel from './car.js';
+
 
 const ProductSchema = new mongoose.Schema({
   name: {
@@ -22,13 +26,13 @@ const ProductSchema = new mongoose.Schema({
   car_id: {
     type: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'car'
+      ref: 'Car'
     }],
     required: true
   },
   category_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'category',
+    ref: 'Category',
     required: true
   },
   status: {
@@ -38,7 +42,7 @@ const ProductSchema = new mongoose.Schema({
   },
   brand_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'brand',
+    ref: 'Brand',
     required: true
   },
   stock: {

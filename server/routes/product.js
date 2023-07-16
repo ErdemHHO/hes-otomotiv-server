@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/",auth, getAllProducts);
 router.get("/:id",auth, getProduct);
 router.get("/total/total",auth, totalProductNumber)
-router.get("/search/search",auth,searchProduct);
+router.get("/search/search",searchProduct);
 
 router.post("/",auth,upload.array("images"),addProduct);
 router.post("/bulk/price",auth,bulkPriceUpdate);

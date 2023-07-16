@@ -211,7 +211,8 @@ const getProduct = async (req, res) => {
         $or: [{ name: { $regex: q, $options: "i" } }, { title: { $regex: q, $options: "i" } }, { stockCode: { $regex: q, $options: "i" } }],
       });
   
-      if (!products || products.length === 0) {
+      if (!products || products === 0) {
+        console.log("Ürün bulunamadı");
         return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
       }
   
