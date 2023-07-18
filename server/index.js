@@ -14,6 +14,8 @@ import seriRoutes from './routes/seri.js';
 import productRoutes from './routes/product.js';
 import adminRoutes from './routes/admin.js';
 
+const DB_CONNECTION = "mongodb+srv://hesotomotiv34:Hes-otomotiv-02166301616@hesotomotiv.izxf0dk.mongodb.net/?retryWrites=true&w=majority";
+
 
 const app = express();
 dotenv.config();
@@ -38,10 +40,10 @@ app.use((req, res) => {
   res.json({ success: false, message: "Geçersiz endpoint" });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = 3000;
 
 mongoose.set("strictQuery", false)
-  .connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Port ${PORT} dinleniyor.`);

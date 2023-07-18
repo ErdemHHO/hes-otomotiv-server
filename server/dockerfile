@@ -1,0 +1,17 @@
+# Base image
+FROM node:latest
+
+# Çalışma dizini oluşturun ve içine geçin
+WORKDIR /app
+
+# Bağımlılıkları kopyalayın
+COPY package.json ./
+
+# Bağımlılıkları yükleyin
+RUN npm install
+
+# Uygulama kaynak kodunu kopyalayın
+COPY . .
+
+# Uygulamayı çalıştırın
+CMD ["npm", "start"]
