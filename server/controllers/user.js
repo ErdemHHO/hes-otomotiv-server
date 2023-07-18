@@ -182,59 +182,60 @@ const getProductsByCarAndCategory = async (req, res) => {
 };
 
 const getProductsBySeriesSlug = async (req, res) => {
-    try {
-      const { slug } = req.params;
-  
-      // Seri modelinde slug değerine göre arama yapılıyor
-      const series = await SeriModel.findOne({ slug });
-  
-      if (!series) {
-        return res.status(400).json({ success: false, message: "Arama sonucunda seri bulunamadı" });
-      }
-  
-      const seriesId = series._id;
-  
-      // CarModel'de ilgili series_id'ye göre arabayı bul
-      const car = await CarModel.findOne({ series_id: seriesId });
-  
-      if (!car) {
-        return res.status(400).json({ success: false, message: "Seriye ait araç bulunamadı" });
-      }
-  
-      const carId = car._id;
-  
-      // ProductModel'de ilgili car_id'ye ve isActive=true'ye göre ürünleri arama yap
-      const products = await ProductModel.find({ car_id: carId, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
-  
-      if (!products || products.length === 0) {
-        return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
-      }
-  
-      const productsWithImages = await Promise.all(
-        products.map(async (product) => {
-          if (product.image_urls && product.image_urls.length > 0) {
-            const imageUrls = await Promise.all(
-              product.image_urls.map(async (imageUrl) => {
-                const filename = imageUrl.split('/').pop();
-                const params = {
-                  Bucket: bucketName,
-                  Key: filename,
-                };
-                const signedUrl = await s3.getSignedUrlPromise('getObject', params);
-                return signedUrl;
-              })
-            );
-            return { ...product._doc, image_urls: imageUrls };
-          }
-          return product;
-        })
-      );
-  
-      return res.status(200).json({ success: true, products: productsWithImages });
-    } catch (error) {
-      return res.status(400).json({ success: false, message: error.message });
+  try {
+    const { slug } = req.params;
+
+    // Seri modelinde slug değerine göre arama yapılıyor
+    const series = await SeriModel.findOne({ slug });
+
+    if (!series) {
+      return res.status(400).json({ success: false, message: "Arama sonucunda seri bulunamadı" });
     }
-  };
+
+    const seriesId = series._id;
+
+    // CarModel'de ilgili series_id'ye göre arabaları bul
+    const cars = await CarModel.find({ series_id: seriesId });
+
+    if (!cars || cars.length === 0) {
+      return res.status(400).json({ success: false, message: "Seriye ait araç bulunamadı" });
+    }
+
+    const carIds = cars.map((car) => car._id);
+
+    // ProductModel'de ilgili car_id'ler ve isActive=true'ye göre ürünleri arama yap
+    const products = await ProductModel.find({ car_id: { $in: carIds }, isActive: true }, 'name title oemNumber stockCode car_id category_id status brand_id stock oldPrice sellingPrice salesFormat image_urls slug').populate('brand_id', 'name');
+
+    if (!products || products.length === 0) {
+      return res.status(400).json({ success: false, message: "Ürün bulunamadı" });
+    }
+
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        if (product.image_urls && product.image_urls.length > 0) {
+          const imageUrls = await Promise.all(
+            product.image_urls.map(async (imageUrl) => {
+              const filename = imageUrl.split('/').pop();
+              const params = {
+                Bucket: bucketName,
+                Key: filename,
+              };
+              const signedUrl = await s3.getSignedUrlPromise('getObject', params);
+              return signedUrl;
+            })
+          );
+          return { ...product._doc, image_urls: imageUrls };
+        }
+        return product;
+      })
+    );
+
+    return res.status(200).json({ success: true, products: productsWithImages });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
   
 const getCarsBySeriesSlug = async (req, res) => {
     try {
