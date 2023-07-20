@@ -415,7 +415,7 @@ const searchProduct = async (req, res) => {
         image: 1,
         slug: 1,
         image_urls: 1
-      }
+      }.populate('brand_id', 'name')
     );
 
     if (!products || products.length === 0) {
