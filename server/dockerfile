@@ -6,9 +6,16 @@ WORKDIR /app
 
 # Bağımlılıkları kopyalayın
 COPY package.json ./
+COPY package-lock.json ./
 
 # Bağımlılıkları yükleyin
 RUN npm install
+
+# Nodemon'u global olarak yükleyin (Geliştirme için)
+RUN npm install nodemon
+
+# Nodemon'u global olarak yükleyin (Geliştirme için)
+RUN npm install -g nodemon
 
 # Uygulama kaynak kodunu kopyalayın
 COPY . .
