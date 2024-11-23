@@ -1,7 +1,7 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import AdminModel from '../models/admin.js';
-import mongoose from 'mongoose'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
 
 const signin = async (req, res) => {
   const { email, password } = req.body;
@@ -32,7 +32,7 @@ const signin = async (req, res) => {
 };
 
 const signup = async (req, res) => {
-  const { email, password, confirmPassword, name, surname,isSuperAdmin } = req.body;
+  const { email, password, confirmPassword, name, surname, isSuperAdmin } = req.body;
   try {
     const admin = await AdminModel.findOne({ email });
     if (admin) return res.status(400).json({ success: false, message: "Bu Admin Zaten Kayıtlı" });
@@ -57,7 +57,7 @@ const signup = async (req, res) => {
       password: sifrelenmisParola,
       name,
       surname,
-      isSuperAdmin
+      isSuperAdmin,
     });
 
     res.status(200).json({ success: true, message: "Kayıt Başarılı", newAdmin });
@@ -67,28 +67,34 @@ const signup = async (req, res) => {
 };
 
 const getAllAdmins = async (req, res) => {
+  // updated
   try {
     const admins = await AdminModel.find();
-    if (admins.length === 0) return res.status(400).json({ success: false, message: "Admin bulunamadi" });
+    if (!admins || admins.length === 0) return res.status(400).json({ success: false, message: "Admin bulunamadi" });
+
     res.status(200).json({ success: true, admins });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 const getAdmin = async (req, res) => {
+  // updated
   try {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Hatalı işlem" });
     }
+
     const admin = await AdminModel.findById(id);
-    if (!admin || admin.length === 0) return res.status(400).json({ success: false, message: "Admin bulunamadı" });
+    if (!admin) return res.status(400).json({ success: false, message: "Admin bulunamadı" });
 
     res.status(200).json({ success: true, admin });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
 const deleteAdmin = async (req, res) => {
   try {
     const id = req.params.id;
@@ -154,12 +160,8 @@ const updateAdmin = async (req, res) => {
   }
 };
 
-
 export {
-  signin,
-  signup,
-  getAllAdmins,
-  getAdmin,
-  deleteAdmin,
-  updateAdmin
+  deleteAdmin, getAdmin, getAllAdmins, signin,
+  signup, updateAdmin
 };
+

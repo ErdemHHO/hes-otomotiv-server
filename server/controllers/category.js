@@ -1,8 +1,8 @@
-import CategoryModel from '../models/category.js';
 import slugify from 'slugify';
-
+import CategoryModel from '../models/category.js';
 
 const getAllCategories = async (req, res) => {
+  // updated
   try {
     const categories = await CategoryModel.find();
     if (!categories || categories.length === 0) {
@@ -10,32 +10,32 @@ const getAllCategories = async (req, res) => {
     }
     return res.status(200).json({ success: true, categories });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 const getCategory = async (req, res) => {
+  // updated
   try {
     const category = await CategoryModel.findOne({ slug: req.params.id });
     if (!category) {
       return res.status(400).json({ success: false, message: "Kategori bulunamadı" });
     }
-    return res.status(200).json({ success: true, category }); // category: category
+    return res.status(200).json({ success: true, category });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
 const addCategory = async (req, res) => {
-    try {
-      const { body } = req;
-  
-      const newCategory = await CategoryModel.create({ ...body });
-      return res.status(201).json({ success: true, message: "Kategori basariyla eklendi.", newCategory });
-    } catch (error) {
-      return res.status(400).json({ success: false, message: error.message });
-    }
+  try {
+    const { body } = req;
+
+    const newCategory = await CategoryModel.create({ ...body });
+    return res.status(201).json({ success: true, message: "Kategori basariyla eklendi.", newCategory });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
 };
 
 const updateCategory = async (req, res) => {
@@ -74,12 +74,9 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-
-
 export {
-  addCategory,
-  getCategory,
-  updateCategory,
-  deleteCategory,
-  getAllCategories
+  addCategory, deleteCategory,
+  getAllCategories, getCategory,
+  updateCategory
 };
+

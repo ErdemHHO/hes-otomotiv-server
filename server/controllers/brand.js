@@ -1,7 +1,8 @@
-import BrandModel from '../models/brand.js';
 import slugify from 'slugify';
+import BrandModel from '../models/brand.js';
 
 const getAllBrands = async (req, res) => {
+  // updated
   try {
     const brands = await BrandModel.find();
     if (!brands || brands.length === 0) {
@@ -9,11 +10,12 @@ const getAllBrands = async (req, res) => {
     }
     return res.status(200).json({ success: true, brands });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 const getBrand = async (req, res) => {
+  // updated
   try {
     const brand = await BrandModel.findOne({ slug: req.params.id });
     if (!brand) {
@@ -21,7 +23,7 @@ const getBrand = async (req, res) => {
     }
     return res.status(200).json({ success: true, brand });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -37,31 +39,30 @@ const addBrand = async (req, res) => {
 };
 
 const updateBrand = async (req, res) => {
-    try {
-      const { body } = req;
-      const brand = await BrandModel.find({ slug: req.params.id });
-      if (!brand || brand.length === 0) {
-        return res.status(400).json({ success: false, message: "Marka bulunamadı" });
-      }
-  
-      // Dize olduğunu doğrulayın
-      if (typeof req.body.name !== "string") {
-        return res.status(400).json({ success: false, message: "Marka adı hatalı" });
-      }
-  
-      const nameSlug = slugify(req.body.name, { lower: true, remove: /[*+~.()'"!:@]/g });
-      const slug = nameSlug.replace(/\s+/g, "-");
-  
-      body.slug = slug;
-  
-      const updatedBrand = await BrandModel.findByIdAndUpdate(brand[0]._id, { ...body }, { new: true });
-  
-      return res.status(200).json({ success: true, message: "Marka başarıyla güncellendi", updatedBrand });
-    } catch (err) {
-      return res.status(400).json({ success: false, message: err.message });
+  try {
+    const { body } = req;
+    const brand = await BrandModel.find({ slug: req.params.id });
+    if (!brand || brand.length === 0) {
+      return res.status(400).json({ success: false, message: "Marka bulunamadı" });
     }
-  };
-  
+
+    // Dize olduğunu doğrulayın
+    if (typeof req.body.name !== "string") {
+      return res.status(400).json({ success: false, message: "Marka adı hatalı" });
+    }
+
+    const nameSlug = slugify(req.body.name, { lower: true, remove: /[*+~.()'"!:@]/g });
+    const slug = nameSlug.replace(/\s+/g, "-");
+
+    body.slug = slug;
+
+    const updatedBrand = await BrandModel.findByIdAndUpdate(brand[0]._id, { ...body }, { new: true });
+
+    return res.status(200).json({ success: true, message: "Marka başarıyla güncellendi", updatedBrand });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+};
 
 const deleteBrand = async (req, res) => {
   try {
@@ -79,9 +80,8 @@ const deleteBrand = async (req, res) => {
 };
 
 export {
-  addBrand,
-  getBrand,
-  updateBrand,
-  deleteBrand,
-  getAllBrands
+  addBrand, deleteBrand,
+  getAllBrands, getBrand,
+  updateBrand
 };
+
