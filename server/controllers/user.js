@@ -170,7 +170,7 @@ const getAllCars = async (req, res) => {
     if (!cars || cars.length === 0) {
       return res.status(400).json({ success: false, message: "Araba bulunamadı" });
     }
-    return res.status(200).json({ success: true, cars });
+    return res.status(200).json({ success: true, categories:cars });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -183,7 +183,7 @@ const getAllSeries = async (req, res) => {
     if (!series || series.length === 0) {
       return res.status(400).json({ success: false, message: "Seri bulunamadı" });
     }
-    return res.status(200).json({ success: true, series });
+    return res.status(200).json({ success: true, categories:series });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
