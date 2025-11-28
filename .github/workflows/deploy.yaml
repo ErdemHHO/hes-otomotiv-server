@@ -16,7 +16,7 @@ jobs:
       # Docker Build
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/erdemhho:api-latest ./api
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/erdemhho:api-latest ./server
 
       # DockerHub Login
       - name: Login to DockerHub
